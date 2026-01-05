@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import AdminDashboard from '@/components/AdminDashboard';
+export const dynamic = 'force-dynamic';
 
 export default async function AdminPage() {
     // Fetch real data
