@@ -170,3 +170,62 @@ body {
   line-height: 1.8;
   color: var(--text-secondary);
 }
+
+/* Mobile Responsive Utilities */
+@media (max-width: 768px) {
+  .hidden-mobile {
+    display: none !important;
+  }
+
+  .flex-col-mobile {
+    flex-direction: column !important;
+  }
+
+  .w-full-mobile {
+    width: 100% !important;
+  }
+
+  .section-padding {
+    padding: 60px 0;
+  }
+
+  .hero-title-mobile {
+    font-size: 2.2rem !important;
+    text-align: center !important;
+  }
+
+  .hero-text-mobile {
+    font-size: 1rem !important;
+    padding: 0 16px;
+    text-align: center !important;
+  }
+
+  .grid-mobile-1 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .grid-mobile-2 {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1px !important;
+  }
+
+  .btn-mobile-adjust {
+    width: 100%;
+    height: 48px !important;
+    font-size: 1rem !important;
+    padding: 0 16px !important;
+  }
+
+  /* Additional Mobile Utilities */
+  .text-center-mobile {
+    text-align: center !important;
+  }
+
+  .items-center-mobile {
+    align-items: center !important;
+  }
+
+  .section-title-mobile {
+    font-size: 2rem !important;
+  }
+}

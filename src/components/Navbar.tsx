@@ -5,6 +5,8 @@ import { logout } from '@/app/auth-actions';
 import { prisma } from '@/lib/prisma';
 import UserMenu from './UserMenu';
 
+import MobileMenu from './MobileMenu';
+
 export default async function Navbar() {
     const cookieStore = await cookies();
     const userIdCookie = cookieStore.get('userId')?.value;
@@ -25,12 +27,15 @@ export default async function Navbar() {
                     </div>
                     <Link href="/" style={{ fontSize: '1.5rem', fontWeight: '700', letterSpacing: '-0.5px', textDecoration: 'none', color: 'var(--text-primary)' }}>Dataracy</Link>
                 </div>
-                <div style={{ display: 'flex', gap: '32px', alignItems: 'center' }}>
+
+                {/* Desktop Menu */}
+                <div className="hidden-mobile" style={{ display: 'flex', gap: '32px', alignItems: 'center' }}>
                     <Link href="/projects" style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>프로젝트</Link>
                     <Link href="/datasets" style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>데이터셋</Link>
                     <Link href="#" style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>요금 안내</Link>
                 </div>
-                <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+
+                <div className="hidden-mobile" style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                     {user ? (
                         <UserMenu name={user.name} email={user.email} />
                     ) : (
@@ -40,6 +45,9 @@ export default async function Navbar() {
                         </>
                     )}
                 </div>
+
+                {/* Mobile Menu Button */}
+                <MobileMenu user={user ? { name: user.name || 'User', email: user.email } : null} />
             </div>
         </nav>
     );
