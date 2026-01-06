@@ -64,6 +64,11 @@ body {
   transition: all var(--transition-smooth);
   cursor: pointer;
   border: none;
+  text-decoration: none;
+}
+
+a {
+  text-decoration: none;
 }
 
 .btn-primary {
@@ -171,8 +176,17 @@ body {
   color: var(--text-secondary);
 }
 
+/* Utility to hide elements on desktop */
+.mobile-only {
+  display: none !important;
+}
+
 /* Mobile Responsive Utilities */
 @media (max-width: 768px) {
+  .mobile-only {
+    display: block !important;
+  }
+
   .hidden-mobile {
     display: none !important;
   }

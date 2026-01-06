@@ -19,20 +19,23 @@ export default async function Navbar() {
     }
 
     return (
-        <nav className="fixed top-0 w-full z-50 bg-glass" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <nav className="fixed top-0 w-full z-50 bg-glass" style={{ borderBottom: 'none' }}>
             <div className="container" style={{ height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ padding: '8px', background: 'var(--primary)', borderRadius: '8px', display: 'flex' }}>
-                        <BarChart2 size={24} color="#fff" />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '60px' }}>
+                    {/* Logo */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ padding: '8px', background: 'var(--primary)', borderRadius: '8px', display: 'flex' }}>
+                            <BarChart2 size={24} color="#fff" />
+                        </div>
+                        <Link href="/" style={{ fontSize: '1.5rem', fontWeight: '700', letterSpacing: '-0.5px', textDecoration: 'none', color: 'var(--text-primary)' }}>Dataracy</Link>
                     </div>
-                    <Link href="/" style={{ fontSize: '1.5rem', fontWeight: '700', letterSpacing: '-0.5px', textDecoration: 'none', color: 'var(--text-primary)' }}>Dataracy</Link>
-                </div>
 
-                {/* Desktop Menu */}
-                <div className="hidden-mobile" style={{ display: 'flex', gap: '32px', alignItems: 'center' }}>
-                    <Link href="/projects" style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>프로젝트</Link>
-                    <Link href="/datasets" style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>데이터셋</Link>
-                    <Link href="#" style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>요금 안내</Link>
+                    {/* Desktop Menu */}
+                    <div className="hidden-mobile" style={{ display: 'flex', gap: '40px', alignItems: 'center' }}>
+                        <Link href="/projects" style={{ color: 'var(--text-primary)', fontSize: '1.1rem', fontWeight: '700' }}>프로젝트</Link>
+                        <Link href="/datasets" style={{ color: 'var(--text-primary)', fontSize: '1.1rem', fontWeight: '700' }}>데이터셋</Link>
+                        <Link href="#" style={{ color: 'var(--text-primary)', fontSize: '1.1rem', fontWeight: '700' }}>요금 안내</Link>
+                    </div>
                 </div>
 
                 <div className="hidden-mobile" style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
