@@ -1,22 +1,27 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import './globals.css'
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { Metadata } from "next";
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
-  title: 'Dataracy | 데이터 분석가 커뮤니티',
-  description: '데이터 분석가들이 서로 피드백을 주고받으며 소통하는 공간입니다.',
-}
+  title: "Dataracy | 데이터에 인문학을 더하다",
+  description: "기술은 AI에게, 분석은 사람이. 공공 데이터 마켓 및 분석가 커뮤니티.",
+};
 
 export default function RootLayout({
   children,
-}: {
-  children: React.ReactNode
-}) {
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html lang="ko">
-      <body className={inter.className} suppressHydrationWarning={true}>{children}</body>
+      <body className={`${inter.variable} min-h-screen antialiased`}>
+        {children}
+      </body>
     </html>
-  )
+  );
 }
