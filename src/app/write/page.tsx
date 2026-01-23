@@ -1,124 +1,183 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
-import { useState, useRef } from 'react'
-import { Loader2, ArrowLeft, Image as ImageIcon, Hash, PenLine, Paperclip, X } from 'lucide-react'
-import Link from 'next/link'
-import Navbar from '@/components/Navbar'
+import React, { useState, useEffect, useRef } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Navbar from '@/components/Navbar';
+import Link from 'next/link';
+import { ArrowLeft, Image as ImageIcon, Loader2, UploadCloud, X, FileText, Database, Users, TrendingUp, PenLine } from 'lucide-react';
 
 export default function WritePage() {
-    const [title, setTitle] = useState('')
-    const [content, setContent] = useState('')
-    const [type, setType] = useState('GENERAL')
-    const [tags, setTags] = useState('')
+    const [title, setTitle] = useState('');
+    const [content, setContent] = useState('');
+    const [type, setType] = useState('STUDY'); // Default type for normal users
+    const [tags, setTags] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
+    const [isAdmin, setIsAdmin] = useState(false); // Check admin status
 
-    // File States
-    const [imageFile, setImageFile] = useState<File | null>(null)
-    const [imagePreview, setImagePreview] = useState<string | null>(null)
-    const [attachedFile, setAttachedFile] = useState<File | null>(null)
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const attachmentInputRef = useRef<HTMLInputElement>(null);
 
-    const [loading, setLoading] = useState(false)
+    const supabase = createClient();
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const editPostId = searchParams.get('id');
 
-    const imageInputRef = useRef<HTMLInputElement>(null)
-    const fileInputRef = useRef<HTMLInputElement>(null)
+    useEffect(() => {
+        // Fetch post data if in edit mode
+        const loadPostData = async () => {
+            if (!editPostId) return;
 
-    const router = useRouter()
-    const supabase = createClient()
+            const { data: post, error } = await supabase
+                .from('posts')
+                .select('*')
+                .eq('id', editPostId)
+                .single();
 
-    // Handle Image Selection
-    const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            const file = e.target.files[0]
-            setImageFile(file)
-            setImagePreview(URL.createObjectURL(file))
+            if (error) {
+                console.error("Error loading post:", error);
+                alert("게시글을 불러오지 못했습니다.");
+                router.push('/');
+                return;
+            }
+
+            if (post) {
+                setTitle(post.title);
+                setContent(post.content);
+                setType(post.type);
+                setTags(post.tags ? post.tags.join(', ') : '');
+                if (post.image_url) setImagePreview(post.image_url);
+            }
+        };
+
+        loadPostData();
+    }, [editPostId, supabase, router]);
+
+    useEffect(() => {
+        const checkUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                router.push('/login');
+                return;
+            }
+
+            // Check Admin Role
+            const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+            if (profile?.role === 'ADMIN') {
+                setIsAdmin(true);
+                setType('DATA'); // Admins might prefer DATA default
+            }
+        };
+        checkUser();
+    }, [router, supabase]);
+
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setImageFile(file);
+            const url = URL.createObjectURL(file);
+            setImagePreview(url);
         }
-    }
+    };
 
-    // Handle File Selection
-    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            setAttachedFile(e.target.files[0])
+    const handleAttachmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setAttachmentFile(file);
         }
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setLoading(true)
-
-        const { data: { user } } = await supabase.auth.getUser()
-
-        if (!user) {
-            alert("로그인이 필요합니다.")
-            router.push('/login')
-            return
+        e.preventDefault();
+        if (!title || !content) {
+            alert('제목과 내용을 입력해주세요.');
+            return;
         }
 
-        let imageUrl = null
-        let fileUrl = null
+        setIsSubmitting(true);
 
         try {
-            // 1. Upload Image if exists
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error('로그인이 필요합니다.');
+
+            // 1. Upload Image (if any)
+            let imageUrl = null;
             if (imageFile) {
-                const fileExt = imageFile.name.split('.').pop()
-                const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
-                const { error: uploadError } = await supabase.storage
+                const fileExt = imageFile.name.split('.').pop();
+                const fileName = `${Date.now()}_${Math.random()}.${fileExt}`;
+                const { error: uploadError, data } = await supabase.storage
                     .from('images')
-                    .upload(fileName, imageFile)
+                    .upload(fileName, imageFile);
 
-                if (uploadError) throw uploadError
+                if (uploadError) throw uploadError;
 
-                // Get Public URL
-                const { data: publicUrlData } = supabase.storage
-                    .from('images')
-                    .getPublicUrl(fileName)
-
-                imageUrl = publicUrlData.publicUrl
+                const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(fileName);
+                imageUrl = publicUrl;
             }
 
-            // 2. Upload Attached File if exists
-            if (attachedFile) {
-                const fileName = `${Date.now()}-${attachedFile.name}`
+            // 2. Upload Attachment (if any)
+            let fileUrl = null;
+            if (attachmentFile) {
+                const fileExt = attachmentFile.name.split('.').pop();
+                const fileName = `${Date.now()}_${Math.random()}.${fileExt}`;
                 const { error: uploadError } = await supabase.storage
                     .from('files')
-                    .upload(fileName, attachedFile)
+                    .upload(fileName, attachmentFile);
 
-                if (uploadError) throw uploadError
+                if (uploadError) throw uploadError;
 
-                const { data: publicUrlData } = supabase.storage
-                    .from('files')
-                    .getPublicUrl(fileName)
-
-                fileUrl = publicUrlData.publicUrl
+                const { data: { publicUrl } } = supabase.storage.from('files').getPublicUrl(fileName);
+                fileUrl = publicUrl;
             }
 
-            // 3. Insert Post
-            const tagArray = tags.split(',').map(tag => tag.trim()).filter(t => t.length > 0)
-            const excerpt = content.slice(0, 150) + (content.length > 150 ? '...' : '')
+            // 3. Insert or Update Post
+            const tagArray = tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
 
-            const { error } = await supabase.from('posts').insert({
+            const postData = {
                 title,
                 content,
                 type,
                 tags: tagArray,
-                excerpt,
-                author_id: user.id,
-                image_url: imageUrl,
-                file_url: fileUrl
-            })
+                ...(imageUrl && { image_url: imageUrl }), // Only update if new image
+                ...(fileUrl && { file_url: fileUrl }), // Only update if new file
+            };
 
-            if (error) throw error
+            let error;
 
-            alert("게시글이 등록되었습니다!")
-            router.push('/')
-            router.refresh()
+            if (editPostId) {
+                // UPDATE
+                const { error: updateError } = await supabase
+                    .from('posts')
+                    .update(postData)
+                    .eq('id', editPostId)
+                    .eq('author_id', user.id); // Security: ensure owernship (though RLS should handle too)
+                error = updateError;
+            } else {
+                // INSERT
+                const { error: insertError } = await supabase
+                    .from('posts')
+                    .insert({
+                        ...postData,
+                        author_id: user.id
+                    });
+                error = insertError;
+            }
+
+            if (error) throw error;
+
+            router.push('/');
+            router.refresh();
 
         } catch (error: any) {
-            console.error(error)
-            alert("업로드 중 오류가 발생했습니다: " + error.message)
-            setLoading(false)
+            console.error(error);
+            alert('글 작성 중 오류가 발생했습니다: ' + error.message);
+        } finally {
+            setIsSubmitting(false);
         }
-    }
+    };
 
     return (
         <div className="min-h-screen bg-[#0f172a] text-slate-100 flex flex-col">
@@ -129,158 +188,160 @@ export default function WritePage() {
                     <ArrowLeft className="w-4 h-4" /> 메인으로 돌아가기
                 </Link>
 
-                <div className="glass-card p-8 rounded-3xl border border-white/5 relative overflow-hidden">
-                    <h1 className="text-3xl font-bold mb-8 flex items-center gap-3">
-                        <PenLine className="w-8 h-8 text-blue-400" />
-                        새 글 작성하기
+                <div className="glass-card p-8 rounded-3xl border border-white/10 shadow-2xl">
+                    <h1 className="text-2xl font-bold mb-8 flex items-center gap-2">
+                        <PenLine className="w-6 h-6 text-blue-400" />
+                        {editPostId ? '콘텐츠 수정' : '새 콘텐츠 작성'}
                     </h1>
 
-                    <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
+                    <form onSubmit={handleSubmit} className="space-y-8">
+
+                        {/* Category Selection */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {/* Only Admin can see DATA option */}
+                            {isAdmin && (
+                                <label className={`cursor-pointer p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${type === 'DATA' ? 'bg-violet-600 border-violet-500 text-white shadow-lg' : 'bg-slate-800/50 border-white/5 text-slate-400 hover:bg-slate-800'}`}>
+                                    <input type="radio" name="type" value="DATA" checked={type === 'DATA'} onChange={(e) => setType(e.target.value)} className="hidden" />
+                                    <Database className="w-6 h-6" />
+                                    <span className="text-sm font-bold">공공 데이터</span>
+                                </label>
+                            )}
+
+                            <label className={`cursor-pointer p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${type === 'STUDY' ? 'bg-fuchsia-600 border-fuchsia-500 text-white shadow-lg' : 'bg-slate-800/50 border-white/5 text-slate-400 hover:bg-slate-800'}`}>
+                                <input type="radio" name="type" value="STUDY" checked={type === 'STUDY'} onChange={(e) => setType(e.target.value)} className="hidden" />
+                                <Users className="w-6 h-6" />
+                                <span className="text-sm font-bold">스터디 모집</span>
+                            </label>
+
+                            <label className={`cursor-pointer p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${type === 'CONTINUE' ? 'bg-emerald-600 border-emerald-500 text-white shadow-lg' : 'bg-slate-800/50 border-white/5 text-slate-400 hover:bg-slate-800'}`}>
+                                <input type="radio" name="type" value="CONTINUE" checked={type === 'CONTINUE'} onChange={(e) => setType(e.target.value)} className="hidden" />
+                                <TrendingUp className="w-6 h-6" />
+                                <span className="text-sm font-bold">인사이트 계속</span>
+                            </label>
+
+                            <label className={`cursor-pointer p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${type === 'GENERAL' ? 'bg-blue-600 border-blue-500 text-white shadow-lg' : 'bg-slate-800/50 border-white/5 text-slate-400 hover:bg-slate-800'}`}>
+                                <input type="radio" name="type" value="GENERAL" checked={type === 'GENERAL'} onChange={(e) => setType(e.target.value)} className="hidden" />
+                                <FileText className="w-6 h-6" />
+                                <span className="text-sm font-bold">자유주제</span>
+                            </label>
+                        </div>
+                        {!isAdmin && (
+                            <p className="text-xs text-slate-500 text-center">* 공공 데이터 업로드는 검증된 데이터러시 제공자(관리자)만 가능합니다.</p>
+                        )}
+
+                        {/* Image Upload */}
+                        <div className="space-y-2">
+                            <label className="block text-sm font-bold text-slate-300">대표 이미지 (Cover)</label>
+                            <div
+                                onClick={() => fileInputRef.current?.click()}
+                                className="w-full h-48 rounded-2xl border-2 border-dashed border-white/10 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500/50 hover:bg-white/5 transition-all overflow-hidden relative group"
+                            >
+                                {imagePreview ? (
+                                    <>
+                                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <p className="text-white font-bold">이미지 변경하기</p>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 mb-3 group-hover:scale-110 transition-transform">
+                                            <ImageIcon className="w-6 h-6" />
+                                        </div>
+                                        <p className="text-sm text-slate-400">클릭하여 이미지를 업로드하세요</p>
+                                        <p className="text-xs text-slate-600 mt-1">JPG, PNG, GIF (Max 5MB)</p>
+                                    </>
+                                )}
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={handleImageChange}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Attachment Upload (Only for DATA type or everyone?) - Let's allow for all but emphasize for DATA */}
+                        <div className="space-y-2">
+                            <label className="block text-sm font-bold text-slate-300">첨부 파일 (데이터셋, 자료 등)</label>
+                            <div className="flex items-center gap-4">
+                                <button
+                                    type="button"
+                                    onClick={() => attachmentInputRef.current?.click()}
+                                    className="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium transition-colors flex items-center gap-2 border border-white/5"
+                                >
+                                    <UploadCloud className="w-4 h-4" />
+                                    {attachmentFile ? '파일 변경' : '파일 선택'}
+                                </button>
+                                {attachmentFile && (
+                                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-500/20 text-blue-300 text-sm">
+                                        <span className="truncate max-w-[200px]">{attachmentFile.name}</span>
+                                        <button type="button" onClick={() => setAttachmentFile(null)} className="hover:text-white"><X className="w-3 h-3" /></button>
+                                    </div>
+                                )}
+                                <input
+                                    ref={attachmentInputRef}
+                                    type="file"
+                                    className="hidden"
+                                    onChange={handleAttachmentChange}
+                                />
+                            </div>
+                        </div>
 
                         {/* Title */}
                         <div className="space-y-2">
-                            <label className="text-sm font-bold text-slate-400">제목</label>
+                            <label className="block text-sm font-bold text-slate-300">제목</label>
                             <input
                                 type="text"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
-                                placeholder="제목을 입력하세요"
-                                className="w-full bg-slate-900/50 border border-white/10 rounded-xl py-4 px-6 text-lg font-medium text-white focus:outline-none focus:border-blue-500/50 transition-all placeholder:text-slate-600"
-                                required
+                                className="w-full bg-[#0f172a] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-600"
+                                placeholder="콘텐츠의 제목을 입력하세요"
                             />
                         </div>
 
-                        {/* Category & Tags Row */}
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold text-slate-400">카테고리</label>
-                                <div className="relative">
-                                    <select
-                                        value={type}
-                                        onChange={(e) => setType(e.target.value)}
-                                        className="w-full bg-slate-900/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-blue-500/50 appearance-none"
-                                    >
-                                        <option value="GENERAL">일반 / 인사이트</option>
-                                        <option value="STUDY">스터디 모집</option>
-                                        <option value="CONTINUE">이어가기 프로젝트</option>
-                                        <option value="DATA">데이터 공유</option>
-                                    </select>
-                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">▼</div>
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold text-slate-400">태그 (쉼표로 구분)</label>
-                                <div className="relative">
-                                    <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                                    <input
-                                        type="text"
-                                        value={tags}
-                                        onChange={(e) => setTags(e.target.value)}
-                                        placeholder="파이썬, 시각화, 서울시"
-                                        className="w-full bg-slate-900/50 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white focus:outline-none focus:border-blue-500/50 transition-all placeholder:text-slate-600"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* File Upload Section */}
-                        <div className="grid md:grid-cols-2 gap-6">
-                            {/* Image Upload */}
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold text-slate-400">대표 이미지 (썸네일)</label>
-                                <div
-                                    onClick={() => imageInputRef.current?.click()}
-                                    className={`w-full h-32 border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer transition-colors overflow-hidden relative ${imagePreview ? 'border-blue-500/50' : 'border-white/10 hover:border-white/30 hover:bg-white/5'}`}
-                                >
-                                    {imagePreview ? (
-                                        <>
-                                            <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                                                <p className="text-white text-xs font-bold">이미지 변경</p>
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <ImageIcon className="w-6 h-6 text-slate-500 mb-2" />
-                                            <span className="text-xs text-slate-500">클릭하여 이미지 업로드</span>
-                                        </>
-                                    )}
-                                    <input
-                                        type="file"
-                                        ref={imageInputRef}
-                                        onChange={handleImageSelect}
-                                        accept="image/*"
-                                        className="hidden"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* File Attachment */}
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold text-slate-400">첨부 파일 (데이터셋, 코드 등)</label>
-                                <div
-                                    onClick={() => fileInputRef.current?.click()}
-                                    className="w-full h-32 border-2 border-dashed border-white/10 hover:border-white/30 hover:bg-white/5 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-colors"
-                                >
-                                    {attachedFile ? (
-                                        <div className="text-center px-4">
-                                            <Paperclip className="w-6 h-6 text-blue-400 mx-auto mb-2" />
-                                            <span className="text-sm text-white font-medium break-all line-clamp-1">{attachedFile.name}</span>
-                                            <span className="text-xs text-slate-500 block mt-1">{(attachedFile.size / 1024 / 1024).toFixed(2)} MB</span>
-                                            <button
-                                                type="button"
-                                                onClick={(e) => { e.stopPropagation(); setAttachedFile(null); }}
-                                                className="text-xs text-red-400 hover:text-red-300 mt-2 font-bold"
-                                            >
-                                                삭제
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <Paperclip className="w-6 h-6 text-slate-500 mb-2" />
-                                            <span className="text-xs text-slate-500">클릭하여 파일 첨부</span>
-                                        </>
-                                    )}
-                                    <input
-                                        type="file"
-                                        ref={fileInputRef}
-                                        onChange={handleFileSelect}
-                                        className="hidden"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Content Editor Area */}
+                        {/* Tags */}
                         <div className="space-y-2">
-                            <label className="text-sm font-bold text-slate-400">내용</label>
+                            <label className="block text-sm font-bold text-slate-300">태그 (쉼표로 구분)</label>
+                            <input
+                                type="text"
+                                value={tags}
+                                onChange={(e) => setTags(e.target.value)}
+                                className="w-full bg-[#0f172a] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-600"
+                                placeholder="예: #교통, #서울시, #데이터분석"
+                            />
+                        </div>
+
+                        {/* Content */}
+                        <div className="space-y-2">
+                            <label className="block text-sm font-bold text-slate-300">내용</label>
                             <textarea
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
-                                placeholder="당신의 인사이트를 자유롭게 펼쳐보세요. 마크다운 문법을 지원합니다."
-                                className="w-full h-96 bg-slate-900/50 border border-white/10 rounded-xl py-4 px-6 text-white focus:outline-none focus:border-blue-500/50 transition-all placeholder:text-slate-600 resize-none leading-relaxed"
-                                required
+                                className="w-full h-80 bg-[#0f172a] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-600 resize-none leading-relaxed"
+                                placeholder="자유롭게 내용을 작성해주세요. (마크다운 지원 예정)"
                             />
                         </div>
 
-                        {/* Action Buttons */}
-                        <div className="flex justify-end gap-3 pt-4">
-                            <button
-                                type="button"
-                                onClick={() => router.back()}
-                                className="px-6 py-3 rounded-xl border border-white/10 text-slate-300 hover:bg-white/5 transition-colors font-bold text-sm"
-                            >
-                                취소
-                            </button>
+                        {/* Submit Button */}
+                        <div className="pt-4 flex justify-end">
                             <button
                                 type="submit"
-                                disabled={loading}
-                                className="px-8 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all shadow-lg shadow-blue-500/20 text-sm flex items-center gap-2"
+                                disabled={isSubmitting}
+                                className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
                             >
-                                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : '글 게시하기'}
+                                {isSubmitting ? (
+                                    <>
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                        등록 중...
+                                    </>
+                                ) : (
+                                    editPostId ? '수정하기' : '발행하기'
+                                )}
                             </button>
                         </div>
+
                     </form>
                 </div>
             </div>
