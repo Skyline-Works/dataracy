@@ -82,7 +82,7 @@ export default async function Home() {
       {/* Navbar */}
       <Navbar />
 
-      <main className="flex-1 pb-20 relative z-10">
+      <main className="flex-1 pb-20 relative z-10 w-full overflow-x-hidden">
 
         {/* Full Width Hero Section (Edge-to-Edge) */}
         <section className="relative w-full border-b border-white/5 bg-slate-900/50 shadow-2xl mb-12">
@@ -110,7 +110,7 @@ export default async function Home() {
                 </span>
                 NEW UPDATE
               </div>
-              <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+              <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight break-keep">
                 기술은 <span className="text-blue-400">AI</span>에게,<br />
                 분석은 <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">사람</span>이.
               </h1>
@@ -216,7 +216,8 @@ export default async function Home() {
 
 
           {/* Right Content Area */}
-          <div className="lg:col-span-9 flex flex-col gap-8">
+          <div className="lg:col-span-9 flex flex-col gap-8 w-full min-w-0">
+            {/* min-w-0 Added to prevent flex items from checking out parent width */}
 
             {/* Featured Section Header */}
             <div className="flex items-center justify-between pb-4 border-b border-white/5">
@@ -242,8 +243,8 @@ export default async function Home() {
 
             {/* Featured Article layout (Latest Post) */}
             {featuredPost && (
-              <Link href={`/posts/${featuredPost.id}`} className="block">
-                <div className="glass-card rounded-2xl overflow-hidden group hover:border-blue-500/30 transition-all cursor-pointer h-full">
+              <Link href={`/posts/${featuredPost.id}`} className="block w-full">
+                <div className="glass-card rounded-2xl overflow-hidden group hover:border-blue-500/30 transition-all cursor-pointer h-full w-full">
                   <div className="grid md:grid-cols-2 h-full">
                     {/* Image or Placeholder */}
                     <div className="h-48 md:h-auto bg-slate-800 relative overflow-hidden">
@@ -259,12 +260,12 @@ export default async function Home() {
                       )}
                     </div>
 
-                    <div className="p-6 md:p-8 flex flex-col justify-center bg-transparent">
+                    <div className="p-6 md:p-8 flex flex-col justify-center bg-transparent min-w-0">
                       <div className="flex gap-2 mb-3">
                         <span className="px-2.5 py-1 text-[10px] font-bold bg-blue-500 text-white rounded">{featuredPost.type}</span>
                         <span className="px-2.5 py-1 text-[10px] font-bold bg-white/10 text-slate-300 rounded border border-white/5">NEW</span>
                       </div>
-                      <h2 className="text-2xl font-bold text-white mb-3 group-hover:text-blue-300 transition-colors leading-snug">
+                      <h2 className="text-2xl font-bold text-white mb-3 group-hover:text-blue-300 transition-colors leading-snug break-keep">
                         {featuredPost.title}
                       </h2>
                       <p className="text-slate-400 text-sm line-clamp-2 mb-4">
@@ -287,12 +288,12 @@ export default async function Home() {
             )}
 
             {/* Grid of Content (Articles, Datasets mixed) */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
               {gridPosts.map((post: any) => (
-                <Link href={`/posts/${post.id}`} key={post.id} className="block group">
-                  <div className="glass-card p-5 rounded-2xl flex flex-col gap-3 group-hover:bg-white/5 transition-all h-full cursor-pointer">
+                <Link href={`/posts/${post.id}`} key={post.id} className="block group w-full min-w-0">
+                  <div className="glass-card p-5 rounded-2xl flex flex-col gap-3 group-hover:bg-white/5 transition-all h-full cursor-pointer w-full overflow-hidden">
 
-                    <div className="h-32 rounded-xl bg-slate-800/50 mb-2 relative overflow-hidden border border-white/5 flex items-center justify-center">
+                    <div className="h-32 rounded-xl bg-slate-800/50 mb-2 relative overflow-hidden border border-white/5 flex items-center justify-center w-full">
                       {post.image_url ? (
                         <img src={post.image_url} className="absolute inset-0 w-full h-full object-cover" alt={post.title} />
                       ) : (
@@ -301,9 +302,9 @@ export default async function Home() {
                       <span className="absolute top-2 right-2 bg-black/40 text-[10px] px-2 py-0.5 rounded text-white font-bold z-10">{post.type}</span>
                     </div>
 
-                    <h3 className={`font-bold text-white group-hover:text-${getTypeColor(post.type)}-300 transition-colors truncate`}>{post.title}</h3>
-                    <p className="text-xs text-slate-400 line-clamp-2 flex-1">{post.excerpt}</p>
-                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-white/5 text-xs text-slate-500">
+                    <h3 className={`font-bold text-white group-hover:text-${getTypeColor(post.type)}-300 transition-colors truncate w-full`}>{post.title}</h3>
+                    <p className="text-xs text-slate-400 line-clamp-2 flex-1 break-keep">{post.excerpt}</p>
+                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-white/5 text-xs text-slate-500 w-full">
                       <div className="flex items-center gap-1">
                         {(post.profiles as any)?.name || '익명'}
                       </div>
@@ -326,7 +327,7 @@ export default async function Home() {
         </section>
       </main>
 
-      <footer className="border-t border-white/5 py-12 bg-black/40 mt-12">
+      <footer className="border-t border-white/5 py-12 bg-black/40 mt-12 w-full">
         <div className="container mx-auto px-6 text-center text-slate-500 text-sm">
           <div className="flex items-center justify-center gap-2 mb-4 opacity-75">
             <div className="w-6 h-6 rounded bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center text-white">
