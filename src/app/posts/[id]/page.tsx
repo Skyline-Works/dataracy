@@ -64,9 +64,9 @@ export default async function PostDetailPage({
                     <div className="flex flex-wrap items-center gap-6 text-sm text-slate-400 border-b border-white/5 pb-8">
                         <div className="flex items-center gap-2">
                             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-violet-500 flex items-center justify-center text-white font-bold text-xs ring-2 ring-[#0f172a]">
-                                {post.profiles?.name?.[0] || 'U'}
+                                {(post.profiles as any)?.name?.[0] || 'U'}
                             </div>
-                            <span className="text-slate-200 font-medium">{post.profiles?.name || '익명 사용자'}</span>
+                            <span className="text-slate-200 font-medium">{(post.profiles as any)?.name || '익명 사용자'}</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <Calendar className="w-4 h-4" />

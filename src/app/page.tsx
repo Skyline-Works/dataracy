@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import { createClient } from "@/lib/supabase/server";
 
 // Define Post type
+// (Using 'any' for profiles to handle Supabase join array/object ambiguity safely)
 type Post = {
   id: number;
   title: string;
@@ -12,9 +13,7 @@ type Post = {
   created_at: string;
   tags: string[];
   image_url: string | null;
-  profiles: {
-    name: string | null;
-  }
+  profiles: any;
 }
 
 // Force dynamic rendering
@@ -274,9 +273,9 @@ export default async function Home() {
                       <div className="flex items-center gap-3 text-xs text-slate-500 mt-auto">
                         <div className="flex items-center gap-2">
                           <div className="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center text-[10px] text-white font-bold">
-                            {featuredPost.profiles?.name?.[0] || 'U'}
+                            {(featuredPost.profiles as any)?.name?.[0] || 'U'}
                           </div>
-                          <span>{featuredPost.profiles?.name || '익명'}</span>
+                          <span>{(featuredPost.profiles as any)?.name || '익명'}</span>
                         </div>
                         <span>•</span>
                         <span>{formatDate(featuredPost.created_at)}</span>
@@ -306,7 +305,7 @@ export default async function Home() {
                     <p className="text-xs text-slate-400 line-clamp-2 flex-1">{post.excerpt}</p>
                     <div className="flex items-center justify-between mt-auto pt-3 border-t border-white/5 text-xs text-slate-500">
                       <div className="flex items-center gap-1">
-                        {post.profiles?.name || '익명'}
+                        {(post.profiles as any)?.name || '익명'}
                       </div>
                       <span>{formatDate(post.created_at)}</span>
                     </div>

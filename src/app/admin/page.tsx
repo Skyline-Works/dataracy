@@ -219,7 +219,7 @@ export default function AdminPage() {
                                                         <div className="font-medium text-white line-clamp-1 max-w-sm">{post.title}</div>
                                                     </td>
                                                     <td className="px-6 py-4 text-slate-300">
-                                                        {post.profiles?.name || 'Unknown'}
+                                                        {(post.profiles as any)?.name || 'Unknown'}
                                                     </td>
                                                     <td className="px-6 py-4">
                                                         <span className={`px-2 py-1 rounded text-[10px] font-bold border border-white/5 
