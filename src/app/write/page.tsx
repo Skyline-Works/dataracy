@@ -1,13 +1,13 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { ArrowLeft, Image as ImageIcon, Loader2, UploadCloud, X, FileText, Database, Users, TrendingUp, PenLine } from 'lucide-react';
 
-export default function WritePage() {
+function WriteContent() {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [type, setType] = useState('STUDY'); // Default type for normal users
@@ -347,4 +347,16 @@ export default function WritePage() {
             </div>
         </div>
     )
+}
+
+export default function WritePage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-[#0f172a] flex items-center justify-center">
+                <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+            </div>
+        }>
+            <WriteContent />
+        </Suspense>
+    );
 }
