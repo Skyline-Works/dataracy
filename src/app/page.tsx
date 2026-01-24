@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, BarChart3, Users, Zap, Database, TrendingUp, BookOpen, Download, LayoutGrid, MessageSquare, Search, PenLine, ArrowUpRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import SidebarFilter from "@/components/SidebarFilter";
+import HeroCarousel from "@/components/HeroCarousel";
 import { createClient } from "@/lib/supabase/server";
 
 // Define Post type
@@ -114,68 +115,8 @@ export default async function Home({
 
       <main className="flex-1 pb-20 relative z-10 w-full overflow-x-hidden">
 
-        {/* Full Width Hero Section (Edge-to-Edge) */}
-        <section className="relative w-full border-b border-white/5 bg-slate-900/50 shadow-2xl mb-12">
-          {/* Banner Content Background */}
-          <div className="absolute inset-0 z-0">
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/90 to-blue-900/30"></div>
-            <svg className="absolute inset-0 w-full h-full opacity-10" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <pattern id="hero-grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="0.5" />
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#hero-grid)" />
-            </svg>
-          </div>
-
-          {/* Content */}
-          <div className="container mx-auto px-6 pt-40 pb-20 relative z-10 grid md:grid-cols-2 gap-12 items-center min-h-[600px]">
-            <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold mb-8 backdrop-blur-sm">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-                </span>
-                NEW UPDATE 2.0
-              </div>
-              <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight break-keep">
-                기술은 <span className="text-blue-400">AI</span>에게,<br />
-                분석은 <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">사람</span>이.
-              </h1>
-              <p className="text-slate-300 mb-10 leading-relaxed text-lg max-w-lg">
-                Dataracy는 공공 데이터의 가치를 재발견하고, 인문학적 인사이트를 공유하는 데이터 분석 전문가들의 공간입니다.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <button className="px-8 py-4 rounded-xl bg-white text-slate-900 font-bold hover:bg-slate-200 transition-colors flex items-center gap-2 text-base shadow-lg shadow-white/10 group">
-                  무료 데이터 탐색 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </button>
-                <Link href="/community" className="px-8 py-4 rounded-xl glass text-white font-bold hover:bg-white/10 transition-colors flex items-center gap-2 text-base">
-                  커뮤니티 입장
-                </Link>
-              </div>
-            </div>
-
-            {/* Right: Visual */}
-            <div className="relative h-full hidden md:flex items-center justify-center pointer-events-none">
-              <div className="relative w-96 h-96 animate-in fade-in zoom-in duration-1000">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500 rounded-2xl rotate-12 blur-[60px] opacity-40 animate-pulse"></div>
-                <div className="absolute bottom-0 left-0 w-40 h-40 bg-violet-500 rounded-full blur-[80px] opacity-30"></div>
-                <div className="absolute inset-0 bg-slate-800/80 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl p-8 flex flex-col gap-6 transform rotate-[-3deg] hover:rotate-0 transition-transform duration-500 items-start">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
-                    <BarChart3 className="w-8 h-8 text-white" />
-                  </div>
-                  <div className="space-y-3 w-full">
-                    <div className="h-4 w-2/3 bg-white/10 rounded animate-pulse"></div>
-                    <div className="h-3 w-full bg-white/5 rounded"></div>
-                    <div className="h-3 w-4/5 bg-white/5 rounded"></div>
-                    <div className="h-3 w-full bg-white/5 rounded"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* Hero Carousel */}
+        <HeroCarousel />
 
         {/* Updated Main Content Layout */}
         <section className="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-8">

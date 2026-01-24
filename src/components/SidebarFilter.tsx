@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { ChevronDown, ChevronUp, Filter, Check } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 type FilterCategory = {
     id: string
@@ -32,7 +33,10 @@ const FILTERS: FilterCategory[] = [
     }
 ]
 
-export default function SidebarFilter() {
+function FilterContent() {
+    const router = useRouter()
+    const searchParams = useSearchParams()
+
     const [openSections, setOpenSections] = useState<Record<string, boolean>>({
         topic: true,
         tech: true,
@@ -41,6 +45,16 @@ export default function SidebarFilter() {
     })
 
     const [selectedFilters, setSelectedFilters] = useState<Set<string>>(new Set())
+
+    // Initialize from URL
+    useEffect(() => {
+        const tags = searchParams.get('tags')
+        if (tags) {
+            setSelectedFilters(new Set(tags.split(',')))
+        } else {
+            setSelectedFilters(new Set())
+        }
+    }, [searchParams])
 
     const toggleSection = (id: string) => {
         setOpenSections(prev => ({
@@ -56,9 +70,24 @@ export default function SidebarFilter() {
         } else {
             newFilters.add(option)
         }
-        setSelectedFilters(newFilters)
-        // Here functionality would be connected to URL params or parent state in a real app
-        console.log("Selected:", Array.from(newFilters))
+
+        applyFilters(newFilters)
+    }
+
+    const applyFilters = (filters: Set<string>) => {
+        const params = new URLSearchParams(searchParams.toString())
+        if (filters.size > 0) {
+            params.set('tags', Array.from(filters).join(','))
+        } else {
+            params.delete('tags')
+        }
+        router.push(`?${params.toString()}`, { scroll: false })
+    }
+
+    const clearFilters = () => {
+        const params = new URLSearchParams(searchParams.toString())
+        params.delete('tags')
+        router.push(`?${params.toString()}`, { scroll: false })
     }
 
     return (
@@ -106,7 +135,7 @@ export default function SidebarFilter() {
             {selectedFilters.size > 0 && (
                 <div className="px-2">
                     <button
-                        onClick={() => setSelectedFilters(new Set())}
+                        onClick={clearFilters}
                         className="text-xs text-slate-500 hover:text-red-400 underline underline-offset-4 decoration-slate-700 transition-colors"
                     >
                         필터 초기화
@@ -114,5 +143,13 @@ export default function SidebarFilter() {
                 </div>
             )}
         </div>
+    )
+}
+
+export default function SidebarFilter() {
+    return (
+        <Suspense fallback={<div className="text-slate-500 text-sm p-4">필터 로딩중...</div>}>
+            <FilterContent />
+        </Suspense>
     )
 }

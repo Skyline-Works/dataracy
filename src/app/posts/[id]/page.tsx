@@ -137,9 +137,97 @@ export default async function PostDetailPage({
                             )}
 
                             {/* Actual Text Content */}
-                            <div className="prose prose-invert prose-lg max-w-none text-slate-300 leading-relaxed min-h-[300px] mb-12">
-                                {post.content}
-                            </div>
+                            {/* Actual Text Content with Report Structure */}
+                            {['INSIGHT', 'GENERAL', 'CONTINUE'].includes(post.type) ? (
+                                <div className="space-y-12">
+                                    {/* 1. 기획 의도 */}
+                                    <section>
+                                        <h3 className="text-xl font-bold text-blue-400 mb-4 flex items-center gap-2">
+                                            <span className="w-1.5 h-6 bg-blue-500 rounded-full inline-block"></span>
+                                            1. 기획 의도
+                                        </h3>
+                                        <div className="bg-slate-900/50 p-6 rounded-2xl border border-white/5 text-slate-300 leading-relaxed">
+                                            <p className="mb-4">
+                                                본 리포트는 공공 데이터를 활용하여 사회적 현상을 심층적으로 분석하고, 데이터 기반의 의사결정을 지원하기 위해 기획되었습니다.
+                                                단순한 통계 나열이 아닌, 데이터 이면에 숨겨진 맥락(Context)을 파악하는 데 중점을 두었습니다.
+                                            </p>
+                                        </div>
+                                    </section>
+
+                                    {/* 2. 프로젝트 목적 */}
+                                    <section>
+                                        <h3 className="text-xl font-bold text-blue-400 mb-4 flex items-center gap-2">
+                                            <span className="w-1.5 h-6 bg-blue-500 rounded-full inline-block"></span>
+                                            2. 프로젝트 목적
+                                        </h3>
+                                        <div className="bg-slate-900/50 p-6 rounded-2xl border border-white/5 text-slate-300 leading-relaxed">
+                                            <p>
+                                                이 분석의 주된 목적은 다음과 같습니다:
+                                            </p>
+                                            <ul className="list-disc list-inside mt-2 space-y-1 text-slate-300 ml-2">
+                                                <li>현상에 대한 객관적 데이터 확보 및 시각화</li>
+                                                <li>주요 변수 간의 상관관계 규명</li>
+                                                <li>향후 트렌드 예측 및 대응 방안 모색</li>
+                                            </ul>
+                                        </div>
+                                    </section>
+
+                                    {/* 3. 가설 설정 */}
+                                    <section>
+                                        <h3 className="text-xl font-bold text-blue-400 mb-4 flex items-center gap-2">
+                                            <span className="w-1.5 h-6 bg-blue-500 rounded-full inline-block"></span>
+                                            3. 가설 설정
+                                        </h3>
+                                        <div className="glass-card p-6 rounded-2xl border-l-4 border-l-pink-500 text-slate-200 italic">
+                                            "특정 변수의 변화가 결과에 유의미한 영향을 미칠 것이다"라는 가설을 바탕으로 검증을 수행합니다.
+                                        </div>
+                                    </section>
+
+                                    {/* 4. 수행 방법 및 데이터 */}
+                                    <section>
+                                        <h3 className="text-xl font-bold text-blue-400 mb-4 flex items-center gap-2">
+                                            <span className="w-1.5 h-6 bg-blue-500 rounded-full inline-block"></span>
+                                            4. 수행 방법
+                                        </h3>
+                                        <div className="bg-slate-900/50 p-6 rounded-2xl border border-white/5 text-slate-300 leading-relaxed">
+                                            <p className="mb-2"><strong className="text-white">활용 데이터:</strong> 공공데이터포털, 통계청 자료</p>
+                                            <p className="mb-2"><strong className="text-white">분석 도구:</strong> Python (Pandas, Scikit-learn), Tableau</p>
+                                            <p><strong className="text-white">분석 기간:</strong> 2024.01 - 2024.03</p>
+                                        </div>
+                                    </section>
+
+                                    {/* 5. 수행 결과 (Main Content) */}
+                                    <section>
+                                        <h3 className="text-xl font-bold text-blue-400 mb-4 flex items-center gap-2">
+                                            <span className="w-1.5 h-6 bg-blue-500 rounded-full inline-block"></span>
+                                            5. 수행 결과 및 분석
+                                        </h3>
+                                        <div className="prose prose-invert prose-lg max-w-none text-slate-300 leading-relaxed bg-black/20 p-8 rounded-3xl border border-white/5">
+                                            {post.content}
+                                        </div>
+                                    </section>
+
+                                    {/* 6. 결론 및 제언 */}
+                                    <section>
+                                        <h3 className="text-xl font-bold text-blue-400 mb-4 flex items-center gap-2">
+                                            <span className="w-1.5 h-6 bg-blue-500 rounded-full inline-block"></span>
+                                            6. 결론 및 제언
+                                        </h3>
+                                        <div className="bg-gradient-to-br from-blue-900/30 to-violet-900/30 p-8 rounded-2xl border border-blue-500/20 text-slate-200 leading-relaxed shadow-lg">
+                                            <p className="font-medium text-lg mb-4 text-white">💡 핵심 인사이트</p>
+                                            <p>
+                                                데이터 분석 결과, 유의미한 상관관계가 확인되었습니다.
+                                                이를 바탕으로 보다 효과적인 정책 수립과 전략적 접근이 필요합니다.
+                                                지속적인 모니터링 시스템 구축을 제언합니다.
+                                            </p>
+                                        </div>
+                                    </section>
+                                </div>
+                            ) : (
+                                <div className="prose prose-invert prose-lg max-w-none text-slate-300 leading-relaxed min-h-[300px] mb-12">
+                                    {post.content}
+                                </div>
+                            )}
 
                             {/* Bottom Actions */}
                             <div className="border-t border-white/5 pt-8 pb-12">

@@ -46,8 +46,21 @@ export default function Navbar() {
                     <span className="text-white group-hover:text-blue-200 transition-colors">Dataracy</span>
                 </Link>
 
+                {/* Desktop Navigation Links */}
+                <nav className="hidden md:flex items-center gap-8 mx-6">
+                    <Link href="/reports" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">
+                        리포트
+                    </Link>
+                    <Link href="/datasets" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">
+                        데이터셋
+                    </Link>
+                    <Link href="/community" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">
+                        커뮤니티
+                    </Link>
+                </nav>
+
                 {/* Desktop Search Bar */}
-                <div className="hidden md:flex flex-1 max-w-md mx-8 relative">
+                <div className="hidden md:flex flex-1 max-w-md mr-4 relative">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <input
                         type="text"
@@ -136,10 +149,10 @@ export default function Navbar() {
 
             {/* Mobile Menu Dropdown */}
             {isMobileMenuOpen && (
-                <div className="fixed inset-0 top-0 bg-[#0f172a] z-40 pt-24 px-6 md:hidden animate-in slide-in-from-top-10 duration-200">
-                    <div className="flex flex-col gap-4">
+                <div className="fixed inset-0 top-0 bg-[#0f172a] z-40 pt-24 px-6 md:hidden animate-in slide-in-from-top-10 duration-200 overflow-y-auto">
+                    <div className="flex flex-col gap-4 pb-10">
                         {/* Mobile Search */}
-                        <div className="relative mb-4">
+                        <div className="relative mb-2">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                             <input
                                 type="text"
@@ -148,15 +161,30 @@ export default function Navbar() {
                             />
                         </div>
 
+                        {/* Mobile Navigation Links */}
+                        <div className="flex flex-col gap-2 mb-4">
+                            <Link href="/reports" className="flex items-center gap-3 p-3 text-slate-300 hover:bg-white/5 rounded-xl text-lg font-medium" onClick={() => setIsMobileMenuOpen(false)}>
+                                <span className="w-1 h-1 bg-blue-500 rounded-full"></span> 리포트
+                            </Link>
+                            <Link href="/datasets" className="flex items-center gap-3 p-3 text-slate-300 hover:bg-white/5 rounded-xl text-lg font-medium" onClick={() => setIsMobileMenuOpen(false)}>
+                                <span className="w-1 h-1 bg-violet-500 rounded-full"></span> 데이터셋
+                            </Link>
+                            <Link href="/community" className="flex items-center gap-3 p-3 text-slate-300 hover:bg-white/5 rounded-xl text-lg font-medium" onClick={() => setIsMobileMenuOpen(false)}>
+                                <span className="w-1 h-1 bg-fuchsia-500 rounded-full"></span> 커뮤니티
+                            </Link>
+                        </div>
+
+                        <div className="h-px bg-white/5 my-2"></div>
+
                         {user ? (
                             <>
                                 <div className="flex items-center gap-3 p-4 bg-slate-800/50 rounded-xl mb-2">
                                     <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-fuchsia-500 to-violet-500 flex items-center justify-center text-white text-sm font-bold">
                                         {user.email?.[0].toUpperCase()}
                                     </div>
-                                    <div>
-                                        <p className="text-white font-bold">{user.user_metadata.full_name || 'User'}</p>
-                                        <p className="text-xs text-slate-500">{user.email}</p>
+                                    <div className="overflow-hidden">
+                                        <p className="text-white font-bold truncate">{user.user_metadata.full_name || 'User'}</p>
+                                        <p className="text-xs text-slate-500 truncate">{user.email}</p>
                                     </div>
                                 </div>
 
