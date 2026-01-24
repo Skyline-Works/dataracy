@@ -21,6 +21,7 @@ export default function AdminPage() {
     const [activeTab, setActiveTab] = useState('dashboard')
     const [isAdmin, setIsAdmin] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
+    const [usersList, setUsersList] = useState<any[]>([])
     const [posts, setPosts] = useState<any[]>([])
     const [userCount, setUserCount] = useState(0)
 
@@ -61,12 +62,14 @@ export default function AdminPage() {
             .select('*, profiles(name, email)')
             .order('created_at', { ascending: false })
 
-        // Fetch User Count
-        const { count } = await supabase
+        // Fetch Users (Profiles)
+        const { data: profilesData, count } = await supabase
             .from('profiles')
-            .select('*', { count: 'exact', head: true })
+            .select('*', { count: 'exact' })
+            .order('created_at', { ascending: false })
 
         setPosts(postsData || [])
+        setUsersList(profilesData || [])
         setUserCount(count || 0)
     }
 
@@ -75,6 +78,31 @@ export default function AdminPage() {
 
         await supabase.from('posts').delete().eq('id', postId)
         setPosts(posts.filter(p => p.id !== postId))
+    }
+
+    const updateUserRole = async (userId: string, newRole: string) => {
+        const { error } = await supabase.from('profiles').update({ role: newRole }).eq('id', userId)
+        if (error) {
+            alert('권한 수정 실패: ' + error.message)
+        } else {
+            setUsersList(usersList.map(u => u.id === userId ? { ...u, role: newRole } : u))
+        }
+    }
+
+    const updateMembership = async (userId: string, newTier: string) => {
+        const { error } = await supabase.from('profiles').update({ membership_tier: newTier }).eq('id', userId)
+        if (error) {
+            alert('멤버십 수정 실패: ' + error.message)
+        } else {
+            setUsersList(usersList.map(u => u.id === userId ? { ...u, membership_tier: newTier } : u))
+        }
+    }
+
+    const handleDeleteUser = async (userId: string) => {
+        if (!confirm('정말 이 사용자를 삭제하시겠습니까?')) return
+        const { error } = await supabase.from('profiles').delete().eq('id', userId)
+        if (error) alert('삭제 실패: ' + error.message)
+        else setUsersList(usersList.filter(u => u.id !== userId))
     }
 
     if (isLoading) {
@@ -107,8 +135,8 @@ export default function AdminPage() {
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive
-                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
-                                        : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                                    : 'text-slate-400 hover:bg-white/5 hover:text-white'
                                     }`}
                             >
                                 <Icon className="w-5 h-5" />
@@ -252,11 +280,67 @@ export default function AdminPage() {
 
                     {/* USERS TAB */}
                     {activeTab === 'users' && (
-                        <div className="max-w-7xl mx-auto flex items-center justify-center h-full text-slate-500">
-                            <div className="text-center">
-                                <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                                <h3 className="text-lg font-bold text-white">User Management</h3>
-                                <p className="text-sm">This module is under development.</p>
+                        <div className="max-w-7xl mx-auto">
+                            <div className="glass-card rounded-2xl overflow-hidden border border-white/5 bg-slate-800/30">
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-sm text-left">
+                                        <thead className="bg-slate-900/50 text-slate-400 uppercase font-bold text-xs border-b border-white/5">
+                                            <tr>
+                                                <th className="px-6 py-4">Email / ID</th>
+                                                <th className="px-6 py-4">Name</th>
+                                                <th className="px-6 py-4">Role</th>
+                                                <th className="px-6 py-4">Membership</th>
+                                                <th className="px-6 py-4">Joined At</th>
+                                                <th className="px-6 py-4 text-center">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-white/5">
+                                            {usersList.map((user) => (
+                                                <tr key={user.id} className="hover:bg-white/5 transition-colors">
+                                                    <td className="px-6 py-4">
+                                                        <div className="font-medium text-white">{user.email || 'No Email'}</div>
+                                                        <div className="text-xs text-slate-500 font-mono">{user.id.slice(0, 8)}...</div>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-slate-300">
+                                                        {user.name || 'Unknown'}
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <select
+                                                            value={user.role}
+                                                            onChange={(e) => updateUserRole(user.id, e.target.value)}
+                                                            className="bg-slate-900 border border-white/10 rounded text-xs px-2 py-1 text-slate-300 focus:outline-none focus:border-blue-500"
+                                                        >
+                                                            <option value="USER">USER</option>
+                                                            <option value="ADMIN">ADMIN</option>
+                                                        </select>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <select
+                                                            value={user.membership_tier}
+                                                            onChange={(e) => updateMembership(user.id, e.target.value)}
+                                                            className="bg-slate-900 border border-white/10 rounded text-xs px-2 py-1 text-slate-300 focus:outline-none focus:border-blue-500"
+                                                        >
+                                                            <option value="FREE">FREE</option>
+                                                            <option value="PREMIUM">PREMIUM</option>
+                                                        </select>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-slate-400 text-xs font-mono">
+                                                        {new Date(user.created_at).toLocaleDateString()}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-center">
+                                                        <button
+                                                            className="p-2 hover:bg-red-500/20 rounded-lg text-slate-400 hover:text-red-400 transition-colors"
+                                                            title="Delete User"
+                                                            onClick={() => handleDeleteUser(user.id)}
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     )}

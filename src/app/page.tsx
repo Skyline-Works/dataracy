@@ -194,24 +194,24 @@ export default async function Home({
             {/* Featured Post (Only show on Home or if fits category) */}
             {featuredPost && (
               <Link href={`/posts/${featuredPost.id}`} className="block w-full group relative z-0">
-                <div className="glass-card rounded-3xl overflow-hidden border border-white/10 shadow-2xl relative min-h-[400px] flex flex-col md:flex-row group-hover:border-blue-500/50 transition-all duration-300">
+                <div className="glass-card rounded-3xl overflow-hidden border border-white/10 shadow-2xl relative min-h-[450px] flex flex-col md:flex-row group-hover:border-blue-500/50 transition-all duration-300">
 
                   <div className="absolute inset-0 z-0">
                     <img src={getPostImage(featuredPost)} className="w-full h-full object-cover opacity-100 group-hover:scale-105 transition-transform duration-700" alt="Background" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/30 to-transparent md:bg-gradient-to-r" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent md:bg-gradient-to-r" />
                   </div>
 
-                  <div className="relative z-10 p-8 md:p-12 flex flex-col justify-end w-full md:w-2/3">
+                  <div className="relative z-10 p-6 md:p-12 flex flex-col justify-end w-full md:w-2/3 h-full mt-auto">
                     <div className="flex items-center gap-3 mb-4">
                       <span className="px-3 py-1 text-xs font-bold bg-blue-500 text-white rounded-full shadow-lg shadow-blue-500/20">{featuredPost.type}</span>
                       <span className="px-3 py-1 text-xs font-bold bg-white/10 text-slate-200 rounded-full border border-white/10 backdrop-blur-md">HOT TOPIC</span>
                     </div>
 
-                    <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 leading-tight drop-shadow-lg line-clamp-1">
+                    <h2 className="text-2xl md:text-5xl font-bold text-white mb-4 md:mb-6 leading-tight drop-shadow-lg line-clamp-2 md:line-clamp-1">
                       {featuredPost.title}
                     </h2>
 
-                    <p className="text-slate-300 text-lg line-clamp-1 mb-8 drop-shadow-md max-w-xl">
+                    <p className="text-slate-300 text-base md:text-lg line-clamp-2 md:line-clamp-1 mb-6 md:mb-8 drop-shadow-md max-w-xl">
                       {featuredPost.excerpt || '내용 요약이 없습니다.'}
                     </p>
 
